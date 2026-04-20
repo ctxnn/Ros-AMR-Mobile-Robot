@@ -1,8 +1,10 @@
 """ 
-vision node listens for /image topic messages and 
-runs the data through cv2's hog model for human detection
-overlaying a bounding box on the /image and publishing 
-this bounded box image onto the /image_classified topic. 
+Vision node for the supermarket assistant robot.
+Subscribes to the /image topic (RGB camera feed) and runs 
+OpenCV's HOG+SVM pedestrian detector to identify customers
+in the supermarket aisles. Publishes an annotated image with 
+bounding boxes onto the /image_detected topic for visualisation
+and safe navigation around people.
 """
 
 import rclpy
@@ -19,8 +21,8 @@ import threading
 
 class VisionNode(Node):
     """
-    Vision node produces bounding box for humans in the world
-    and outputs an image overlay
+    Vision node detects customers in the supermarket environment
+    using HOG+SVM and outputs an annotated image overlay.
     """
     def __init__(self):
         super().__init__('vision_node')
@@ -41,19 +43,19 @@ class VisionNode(Node):
             callback_group=MutuallyExclusiveCallbackGroup()
         )
         
-        # Create publisher for classified image
-        self.image_classified_publisher = self.create_publisher(
+        # Create publisher for detected image
+        self.image_detected_publisher = self.create_publisher(
             Image,
-            'image_classified',
+            'image_detected',
             qos_profile=qos_profile_system_default,
             callback_group=MutuallyExclusiveCallbackGroup()
         )
         
-        self.get_logger().info('Vision Node initialized. Listening for images...')
+        self.get_logger().info('Vision Node initialized. Monitoring for customers...')
     
     def image_rcv_cb(self, msg: Image):
         """
-        Callback function that receives images, detects humans, 
+        Callback function that receives images, detects customers, 
         draws bounding boxes, and publishes the result
         """
         try:
@@ -65,12 +67,12 @@ class VisionNode(Node):
                 scale=1.05
             )
             
-            # Draw bounding boxes on detected humans
+            # Draw bounding boxes on detected customers
             for i, (x, y, w, h) in enumerate(bounding_boxes):
-                # Draw rectangle around detected human
+                # Draw rectangle around detected customer
                 cv2.rectangle(cv_image, (x, y), (x + w, y + h), (0, 255, 0), 2)
                 confidence = float(weights[i])
-                label = f'Human: {confidence:.2f}'
+                label = f'Customer: {confidence:.2f}'
                 cv2.putText(
                     cv_image, 
                     label, 
@@ -81,7 +83,7 @@ class VisionNode(Node):
                     2
                 )
             
-            detection_text = f'Humans detected: {len(bounding_boxes)}'
+            detection_text = f'Customers detected: {len(bounding_boxes)}'
             cv2.putText(
                 cv_image,
                 detection_text,
@@ -94,10 +96,10 @@ class VisionNode(Node):
             
             output_msg = self.bridge.cv2_to_imgmsg(cv_image, encoding='bgr8')
             output_msg.header = msg.header  # Preserve original timestamp and frame
-            self.image_classified_publisher.publish(output_msg)
+            self.image_detected_publisher.publish(output_msg)
             
             if len(bounding_boxes) > 0:
-                self.get_logger().info(f'Detected {len(bounding_boxes)} human(s)')
+                self.get_logger().info(f'Detected {len(bounding_boxes)} customer(s) in field of view')
                 
         except Exception as e:
             self.get_logger().error(f'Error processing image: {str(e)}')

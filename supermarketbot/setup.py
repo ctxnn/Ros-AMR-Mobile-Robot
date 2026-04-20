@@ -2,7 +2,7 @@ from setuptools import setup
 import os
 from glob import glob
 
-package_name = 'amr_fe01'
+package_name = 'supermarketbot'
 
 setup(
     name=package_name,
@@ -23,14 +23,14 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='Ryan McKee',
-    maintainer_email='ryanmckee47@icloud.com',
-    description='The ' + package_name + ' package',
-    license='TODO: License declaration',
+    maintainer='Chirag Taneja',
+    maintainer_email='chiragtaneja.work@gmail.com',
+    description='Autonomous supermarket assistant robot — ROS 2 simulation for product navigation and customer interaction',
+    license='MIT',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'vision_node = amr_fe01.vision:main'
+            'vision_node = supermarketbot.vision:main'
         ],
     },
 )

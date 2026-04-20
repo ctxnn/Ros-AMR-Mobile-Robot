@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-<name>amr_fe01</name>
+<name>supermarketbot</name>
   <version>0.0.1</version>
-<description>The amr_fe01 package</description>
-  <maintainer email="ryanmckee47@icloud.com">Ryan McKee</maintainer>
-  <license>TODO: License declaration</license>
+<description>Autonomous supermarket assistant robot — ROS 2 simulation package for indoor product navigation and customer interaction</description>
+  <maintainer email="chiragtaneja.work@gmail.com">Chirag Taneja</maintainer>
+  <license>MIT</license>
 
   <depend>xacro</depend>
   <depend>rviz2</depend>

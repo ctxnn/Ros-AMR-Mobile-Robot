@@ -22,4 +22,4 @@ log/
 .gz/
 
 # Videos (too large for git — use Git LFS or external hosting)
-amr_fe01/videos/
+supermarketbot/videos/
