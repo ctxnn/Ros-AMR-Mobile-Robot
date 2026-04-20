@@ -1,5 +1,17 @@
 # 🛒 Autonomous Supermarket Assistant Robot — ROS 2 Simulation
 
+> [!CAUTION]
+> **TODO — Map Regeneration Required:** The included `maps/world_map.pgm` was generated from a previous world and does **not** match the current supermarket layout. Before using Nav2 navigation mode, you **must** regenerate the map:
+> ```bash
+> # 1. Launch SLAM
+> ros2 launch supermarketbot slam.launch.py
+> # 2. Teleop through all aisles
+> ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/supermarketbot/cmd_vel
+> # 3. Save new map
+> ros2 run nav2_map_server map_saver_cli -f ~/ros2_ws/src/supermarketbot/maps/world_map
+> ```
+> **Remove this notice after regenerating the map.**
+
 <p align="center">
   <strong>Design and simulation of a differential-drive autonomous mobile robot for large supermarkets — assists customers in locating products via SLAM-based mapping, Nav2 autonomous navigation, and computer-vision-based customer detection.</strong>
 </p>
