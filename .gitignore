@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+*/.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.vc.db
+
+# Python
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+
+# ROS 2 build artifacts
+install/
+log/
+
+# Gazebo cache
+.gz/
+
+# Videos (too large for git — use Git LFS or external hosting)
+amr_fe01/videos/
