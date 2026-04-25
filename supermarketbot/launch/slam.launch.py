@@ -4,12 +4,9 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import Command, LaunchConfiguration
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from ros_gz_bridge.actions import RosGzBridge
-from ros_gz_sim.actions import GzServer
 import xacro
-from launch.conditions import IfCondition, UnlessCondition
 
 pkg_name = 'supermarketbot'
 
@@ -18,7 +15,7 @@ def generate_launch_description():
     pkg_share = get_package_share_directory(pkg_name)
     ros_gz_sim_share = get_package_share_directory('ros_gz_sim')
     
-    gz_spawn_model_launch_source = os.path.join(ros_gz_sim_share, "launch", "gz_spawn_model.launch.py")
+    gz_sim_launch_file = os.path.join(ros_gz_sim_share, 'launch', 'gz_sim.launch.py')
     default_model_path = os.path.join(pkg_share, 'urdf', 'supermarketbot.xacro')
     default_rviz_config_path = os.path.join(pkg_share, 'rviz', 'slam_cfg.rviz')
     world_path = os.path.join(pkg_share, 'world', 'world.sdf')
@@ -61,38 +58,54 @@ def generate_launch_description():
     #     prefix='gnome-terminal --',  # Opens in new terminal window
     #     remappings=[('/cmd_vel', '/supermarketbot/cmd_vel')]
     # )
-    gz_server = GzServer(
-        world_sdf_file=world_path,
-        container_name='ros_gz_container',
-        create_own_container='True',
-        use_composition='True',
-    )
-    ros_gz_bridge = RosGzBridge(
-        bridge_name='ros_gz_bridge',
-        config_file=bridge_config_path,
-        container_name='ros_gz_container',
-        create_own_container='False',
-        use_composition='True',
-    )
-    spawn_entity = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(gz_spawn_model_launch_source),
+
+    # Gazebo Sim server (Humble-compatible: use IncludeLaunchDescription with gz_sim.launch.py)
+    # Pass --render-engine-server ogre to avoid OGRE2 crash on WSL2
+    gz_server = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(gz_sim_launch_file),
         launch_arguments={
-            'world': 'empty',
-            'topic': '/robot_description',
-            'entity_name': 'supermarketbot',
-            'x': '1.0',
-            'y': '1.0',
-            'z': '0.65',
+            'gz_args': '-r ' + world_path + ' --render-engine-server ogre',
+            'on_exit_shutdown': 'true',
         }.items(),
     )
 
+    # ROS-Gazebo bridge (Humble-compatible: use parameter_bridge Node)
+    ros_gz_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='ros_gz_bridge',
+        output='screen',
+        parameters=[{'config_file': bridge_config_path}],
+    )
+
+    # Spawn the robot entity into Gazebo
+    spawn_entity = Node(
+        package='ros_gz_sim',
+        executable='create',
+        name='spawn_supermarketbot',
+        output='screen',
+        arguments=[
+            '-topic', '/robot_description',
+            '-name', 'supermarketbot',
+            '-x', '1.0',
+            '-y', '1.0',
+            '-z', '0.65',
+        ],
+    )
+
     return LaunchDescription([
-        SetEnvironmentVariable('GZ_SIM_RESOURCE_PATH', pkg_share),
+        SetEnvironmentVariable('GZ_SIM_RESOURCE_PATH', os.path.join(pkg_share, os.pardir)),
+        SetEnvironmentVariable('LIBGL_ALWAYS_SOFTWARE', '1'),
         DeclareLaunchArgument('use_sim_time', default_value='True', description='Use simulation time'),
         DeclareLaunchArgument('model', default_value=default_model_path, description='Robot model'),
         DeclareLaunchArgument('rvizconfig', default_value=default_rviz_config_path, description='RViz config'),
 
-        ExecuteProcess(cmd=['gz', 'sim', '-g'], output='screen'),
+        # Launch Gazebo GUI client (separate from the server, use ogre1 to avoid OGRE2 crash on WSL2)
+        ExecuteProcess(
+            cmd=['ign', 'gazebo', '-g', '--render-engine-gui', 'ogre'],
+            output='screen',
+        ),
+
         robot_state_publisher_node,
         # vision_node,
         rviz_node,

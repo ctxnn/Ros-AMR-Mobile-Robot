@@ -409,10 +409,32 @@ The full Nav2 stack handles autonomous navigation from the robot's current posit
 
 ### Sending a Navigation Goal
 
+You can send a goal in two ways: **Manually via RViz** or **Automatically via the Product Locator**.
+
+#### Option A: Manual Goal (RViz)
 1. Launch: `ros2 launch supermarketbot nav2.launch.py`
 2. In RViz, click **"2D Pose Estimate"** to set the robot's initial position
 3. Click **"Nav2 Goal"** to set the target shelf location
 4. The robot autonomously plans through the aisles and navigates to the product
+
+#### Option B: Automatic Product Locator (Command Line)
+Once your navigation stack is running and you have set your initial **2D Pose Estimate** in RViz, you can command the robot to drive directly to a product category without guessing coordinates!
+
+Open a new terminal and run:
+```bash
+source /opt/ros/humble/setup.bash
+source ~/s_ws/install/setup.bash
+ros2 run supermarketbot locator snacks
+```
+
+**Supported Products:**
+- `beverages` or `soda`
+- `snacks` or `chips`
+- `dairy` or `milk`
+- `household` or `soap`
+- `checkout`
+
+The script will automatically translate the product into safe `(x, y)` aisle coordinates and dispatch the robot.
 
 ---
 
@@ -445,6 +467,23 @@ The vision node ensures **safe navigation around customers** by detecting pedest
 | Padding | (4, 4) |
 | Scale | 1.05 |
 | Output | Bounding boxes + confidence scores |
+
+### Running the Vision Node
+To see the object detection in action, run the vision node in a separate terminal alongside the main Gazebo simulation:
+```bash
+source /opt/ros/humble/setup.bash
+source ~/s_ws/install/setup.bash
+ros2 run supermarketbot vision
+```
+
+### Viewing the Output (Green Boxes)
+Once the node is running, you can view the live camera feed with the green detection boxes in one of two ways:
+1. **Using RViz**: In your RViz window, click "Add" (bottom left) -> "By Topic" -> select `/image_detected` -> "Image".
+2. **Using rqt_image_view**: Open a new terminal and run:
+   ```bash
+   ros2 run rqt_image_view rqt_image_view
+   ```
+   Then select `/image_detected` from the dropdown menu at the top.
 
 ---
 
