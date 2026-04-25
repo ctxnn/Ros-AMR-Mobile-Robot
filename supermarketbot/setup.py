@@ -30,7 +30,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'vision_node = supermarketbot.vision:main'
+            'vision_node = supermarketbot.vision:main',
+            'locator = supermarketbot.product_locator:main'
         ],
     },
 )

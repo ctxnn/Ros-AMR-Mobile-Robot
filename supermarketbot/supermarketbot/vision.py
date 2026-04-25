@@ -37,7 +37,7 @@ class VisionNode(Node):
         # Create subscription
         self.image_sub = self.create_subscription(
             Image,
-            'image',
+            '/rgb_camera/image',
             self.image_rcv_cb,
             qos_profile=qos_profile_system_default,
             callback_group=MutuallyExclusiveCallbackGroup()
