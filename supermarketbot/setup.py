@@ -31,7 +31,8 @@ setup(
     entry_points={
         'console_scripts': [
             'vision_node = supermarketbot.vision:main',
-            'locator = supermarketbot.product_locator:main'
+            'locator = supermarketbot.product_locator:main',
+            'auto_explorer = supermarketbot.auto_explorer:main',
         ],
     },
 )
