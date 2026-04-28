@@ -15,6 +15,7 @@ slam_toolbox:
     base_frame: base_link
     scan_topic: /scan
     odom_topic: /odom
+    use_sim_time: true
     use_map_saver: true
     mode: mapping #localization
 
