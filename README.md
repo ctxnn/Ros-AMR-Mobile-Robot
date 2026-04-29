@@ -1,19 +1,7 @@
 # 🛒 Autonomous Supermarket Assistant Robot — ROS 2 Simulation
 
-> [!CAUTION]
-> **TODO — Map Regeneration Required:** The included `maps/world_map.pgm` was generated from a previous world and does **not** match the current supermarket layout. Before using Nav2 navigation mode, you **must** regenerate the map:
-> ```bash
-> # 1. Launch SLAM
-> ros2 launch supermarketbot slam.launch.py
-> # 2. Teleop through all aisles
-> ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r /cmd_vel:=/supermarketbot/cmd_vel
-> # 3. Save new map
-> ros2 run nav2_map_server map_saver_cli -f ~/ros2_ws/src/supermarketbot/maps/world_map
-> ```
-> **Remove this notice after regenerating the map.**
-
 <p align="center">
-  <strong>Design and simulation of a differential-drive autonomous mobile robot for large supermarkets — assists customers in locating products via SLAM-based mapping, Nav2 autonomous navigation, and computer-vision-based customer detection.</strong>
+  <strong>Design and simulation of a differential-drive autonomous mobile robot for large supermarkets — features SLAM-based mapping and Nav2 autonomous navigation.</strong>
 </p>
 
 | Field | Value |
@@ -36,11 +24,10 @@
 - [Gazebo Simulation World](#6-gazebo-simulation-supermarket-world)
 - [ROS 2 Architecture](#7-ros-2-architecture)
 - [SLAM — Mapping the Supermarket](#8-slam--mapping-the-supermarket)
-- [Nav2 — Autonomous Navigation](#9-nav2--autonomous-product-navigation)
-- [Computer Vision — Customer Detection](#10-computer-vision--customer-detection)
-- [Getting Started](#11-getting-started)
-- [Repository Structure](#12-repository-structure)
-- [Troubleshooting](#13-troubleshooting)
+- [Nav2 — Autonomous Navigation](#9-nav2--autonomous-navigation)
+- [Getting Started](#10-getting-started)
+- [Repository Structure](#11-repository-structure)
+- [Troubleshooting](#12-troubleshooting)
 
 ---
 
@@ -55,23 +42,6 @@ The project follows a structured robotics simulation workflow:
 3. **Simulation (Gazebo / RViz)** — Testing in a virtual supermarket environment with shelves, aisles, and obstacles
 4. **Control & Navigation** — Implementing teleoperation, SLAM-based mapping, and Nav2 autonomous path planning
 
-### How Product Location Works
-
-The supermarket is divided into **zones** (aisles), each mapped to a product category:
-
-| Zone | Aisle Position | Product Category |
-|---|---|---|
-| Zone A | Shelf Row 1 (y ≈ 3.0) | Beverages |
-| Zone B | Shelf Row 2 (y ≈ 0.5) | Snacks |
-| Zone C | Shelf Row 3 (y ≈ −2.0) | Dairy |
-| Zone D | Shelf Row 4 (y ≈ −4.5) | Household |
-
-When a customer requests a product, the system:
-1. Looks up the product's zone in a coordinate database
-2. Sends the target `(x, y)` as a **Nav2 goal**
-3. The robot autonomously plans a path through the aisles, avoids obstacles and customers, and arrives at the correct shelf
-4. The onboard camera and vision node ensure safe navigation around people
-
 ---
 
 ## 2. Features
@@ -79,10 +49,8 @@ When a customer requests a product, the system:
 - 🤖 **Custom CAD-designed robot** — Multi-layer chassis modeled in Fusion 360, exported as STL meshes
 - 🏪 **Supermarket simulation world** — Indoor environment with shelving aisles, checkout counter, product crates, and a customer model
 - 📡 **360° GPU LiDAR** — 360-sample, 10 Hz, 0.1–10 m range with Gaussian noise for realistic aisle mapping
-- 📷 **RGB Camera** — 640×480 @ 30 fps for customer detection
 - 🗺️ **SLAM Toolbox** — Online synchronous SLAM with Ceres-based scan matching and loop closure for map building
 - 🧭 **Nav2 Full Stack** — AMCL localisation, NavFn global planner, DWB local controller, collision monitor
-- 👁️ **Customer Detection** — Real-time HOG+SVM pedestrian detector for safe navigation around shoppers
 - 🔗 **ROS–Gazebo Bridge** — 9 bidirectional topic bridges for seamless sim-to-ROS communication
 
 ---
@@ -161,7 +129,6 @@ base_link (reference frame)
       ├── left_wheel_link (continuous, Y-axis)
       ├── right_wheel_link (continuous, Y-axis)
       ├── lidar_link (fixed)
-      └── camera_link (fixed)
 ```
 
 ### Links
@@ -173,7 +140,6 @@ base_link (reference frame)
 | `left_wheel_link` | `wheel.stl` | 0.2 kg | Left drive wheel |
 | `right_wheel_link` | `wheel.stl` | 0.2 kg | Right drive wheel |
 | `lidar_link` | `lidar_base_link.stl` + cylinder | 0.15 kg | LiDAR sensor housing |
-| `camera_link` | Green box (20×40×20 mm) | 0.05 kg | RGB camera module |
 
 ### Joints
 
@@ -183,7 +149,6 @@ base_link (reference frame)
 | `left_wheel_..._joint` | `continuous` | chassis → left_wheel | Y |
 | `right_wheel_..._joint` | `continuous` | chassis → right_wheel | Y |
 | `lidar_..._joint` | `fixed` | chassis → lidar | — |
-| `camera_..._joint` | `fixed` | chassis → camera | — |
 
 ### Sensors
 
@@ -196,15 +161,6 @@ base_link (reference frame)
 | Update Rate | 10 Hz |
 | Noise | Gaussian (σ = 0.01) |
 | Topic | `/scan` |
-
-**RGB Camera** — For customer detection:
-
-| Parameter | Value |
-|---|---|
-| Resolution | 640 × 480 |
-| FOV | 60° horizontal |
-| Update Rate | 30 Hz |
-| Topic | `/rgb_camera/image` |
 
 ### Gazebo Plugins (embedded in Xacro)
 
@@ -250,7 +206,6 @@ The simulation world (`world/world.sdf`) recreates an indoor supermarket environ
 | 8 shelf units | SDF box primitives | 5.0×0.5×1.6 m each, brown wood color |
 | Checkout counter | SDF box primitive | 2.0×1.0×1.0 m, near entrance |
 | Product crates (×2) | SDF box primitives | Small obstacles in aisles |
-| Customer | [Gazebo Fuel](https://fuel.gazebosim.org/1.0/OpenRobotics/models/Casual%20female) | Human model for vision node testing |
 
 Each shelf row has a **2 m cross-aisle gap** in the middle (at x ≈ 0) connecting all aisles, allowing the robot to move between them efficiently.
 
@@ -275,12 +230,11 @@ map
                 ├── left_wheel_link   (continuous joint)
                 ├── right_wheel_link  (continuous joint)
                 ├── lidar_link        (fixed)
-                └── camera_link       (fixed)
 ```
 
 ### ROS–Gazebo Bridge
 
-9 topic bridges configured in `config/ros_gz_bridge_gazebo.yaml`:
+7 topic bridges configured in `config/ros_gz_bridge_gazebo.yaml`:
 
 | ROS 2 Topic | Direction | Purpose |
 |---|---|---|
@@ -291,8 +245,6 @@ map
 | `/tf` | GZ → ROS | Transform tree updates |
 | `/scan` | GZ → ROS | LiDAR laser scans |
 | `/scan/points` | GZ → ROS | LiDAR point cloud |
-| `/camera_info` | GZ → ROS | Camera intrinsic parameters |
-| `/image` | GZ → ROS | RGB camera feed |
 
 ### Key Topics
 
@@ -301,8 +253,6 @@ map
 | `/supermarketbot/cmd_vel` | `Twist` | Nav2 / teleop | Gazebo (via bridge) |
 | `/scan` | `LaserScan` | Gazebo | SLAM / Nav2 |
 | `/odom` | `Odometry` | Gazebo | SLAM / Nav2 |
-| `/image` | `Image` | Gazebo | vision_node |
-| `/image_detected` | `Image` | vision_node | RViz (visualisation) |
 | `/map` | `OccupancyGrid` | SLAM / map_server | Nav2 / RViz |
 
 ---
@@ -357,7 +307,7 @@ ros2 run nav2_map_server map_saver_cli -f ~/ros2_ws/src/supermarketbot/maps/worl
 
 ---
 
-## 9. Nav2 — Autonomous Product Navigation
+## 9. Nav2 — Autonomous Navigation
 
 **Config:** `config/nav2_params.yaml`
 
@@ -409,85 +359,14 @@ The full Nav2 stack handles autonomous navigation from the robot's current posit
 
 ### Sending a Navigation Goal
 
-You can send a goal in two ways: **Manually via RViz** or **Automatically via the Product Locator**.
-
-#### Option A: Manual Goal (RViz)
 1. Launch: `ros2 launch supermarketbot nav2.launch.py`
 2. In RViz, click **"2D Pose Estimate"** to set the robot's initial position
 3. Click **"Nav2 Goal"** to set the target shelf location
 4. The robot autonomously plans through the aisles and navigates to the product
 
-#### Option B: Automatic Product Locator (Command Line)
-Once your navigation stack is running and you have set your initial **2D Pose Estimate** in RViz, you can command the robot to drive directly to a product category without guessing coordinates!
-
-Open a new terminal and run:
-```bash
-source /opt/ros/humble/setup.bash
-source ~/s_ws/install/setup.bash
-ros2 run supermarketbot locator snacks
-```
-
-**Supported Products:**
-- `beverages` or `soda`
-- `snacks` or `chips`
-- `dairy` or `milk`
-- `household` or `soap`
-- `checkout`
-
-The script will automatically translate the product into safe `(x, y)` aisle coordinates and dispatch the robot.
-
 ---
 
-## 10. Computer Vision — Customer Detection
-
-**File:** `supermarketbot/vision.py`
-
-The vision node ensures **safe navigation around customers** by detecting pedestrians in the camera feed.
-
-### Pipeline
-
-```
-  /image (camera) ──► CvBridge ──► HOG detectMultiScale ──► Bounding boxes ──► /image_detected
-```
-
-### How It Works
-
-1. **Subscribes** to `/image` (RGB camera at 30 fps)
-2. **Converts** ROS Image → OpenCV BGR8 via `CvBridge`
-3. **Runs** `cv2.HOGDescriptor_getDefaultPeopleDetector()` — a pre-trained Histogram of Oriented Gradients + SVM pedestrian detector
-4. **Draws** green bounding boxes with confidence labels on detected customers
-5. **Publishes** annotated image on `/image_detected`
-6. **Logs** detections for monitoring
-
-### Detection Parameters
-
-| Parameter | Value |
-|---|---|
-| Window stride | (8, 8) |
-| Padding | (4, 4) |
-| Scale | 1.05 |
-| Output | Bounding boxes + confidence scores |
-
-### Running the Vision Node
-To see the object detection in action, run the vision node in a separate terminal alongside the main Gazebo simulation:
-```bash
-source /opt/ros/humble/setup.bash
-source ~/s_ws/install/setup.bash
-ros2 run supermarketbot vision
-```
-
-### Viewing the Output (Green Boxes)
-Once the node is running, you can view the live camera feed with the green detection boxes in one of two ways:
-1. **Using RViz**: In your RViz window, click "Add" (bottom left) -> "By Topic" -> select `/image_detected` -> "Image".
-2. **Using rqt_image_view**: Open a new terminal and run:
-   ```bash
-   ros2 run rqt_image_view rqt_image_view
-   ```
-   Then select `/image_detected` from the dropdown menu at the top.
-
----
-
-## 11. Getting Started
+## 10. Getting Started
 
 ### Prerequisites
 
@@ -511,7 +390,7 @@ sudo apt install \
   ros-${ROS_DISTRO}-joint-state-publisher \
   ros-${ROS_DISTRO}-joint-state-publisher-gui \
   ros-${ROS_DISTRO}-rviz2 \
-  ros-${ROS_DISTRO}-cv-bridge \
+  ros-${ROS_DISTRO}-
   ros-${ROS_DISTRO}-teleop-twist-keyboard
 
 pip install numpy==1.26.4 opencv-python
@@ -547,7 +426,7 @@ ros2 launch supermarketbot nav2.launch.py
 
 ---
 
-## 12. Repository Structure
+## 11. Repository Structure
 
 ```
 supermarketbot/                        # ROS 2 Python package root
@@ -559,7 +438,6 @@ supermarketbot/                        # ROS 2 Python package root
 │
 ├── supermarketbot/                    # Python source module
 │   ├── __init__.py
-│   └── vision.py                      # Customer detection node (HOG+SVM)
 │
 ├── launch/
 │   ├── slam.launch.py                 # SLAM mode — mapping the supermarket
@@ -601,15 +479,7 @@ supermarketbot/                        # ROS 2 Python package root
 
 ---
 
-## 13. Troubleshooting
-
-### Customer model not loading
-
-The Fuel model (Casual female) downloads automatically on first launch. If offline:
-
-```bash
-gz fuel download -u "https://fuel.gazebosim.org/1.0/OpenRobotics/models/Casual female"
-```
+## 12. Troubleshooting
 
 ### SLAM map regeneration required
 
@@ -645,5 +515,5 @@ The robot spawns at z=0.65 and drops to the ground plane. This is expected — w
 ---
 
 <p align="center">
-  Built with ROS 2 · Gazebo Sim · Nav2 · SLAM Toolbox · OpenCV
+  Built with ROS 2 · Gazebo Sim · Nav2 · SLAM Toolbox 
 </p>
