@@ -14,7 +14,7 @@ def generate_launch_description():
     bringup_launch_dir = os.path.join(bringup_dir, 'launch')
     nav2_bringup_share = get_package_share_directory('nav2_bringup')
     pkg_share_dir = get_package_share_directory('supermarketbot')
-    map_yaml_file = os.path.join(pkg_share_dir, 'maps', 'world_map.yaml')
+    map_yaml_file = os.path.join(pkg_share_dir, 'maps', 'supermarket_map.yaml')
     default_rviz_config_path = os.path.join(nav2_bringup_share, 'rviz', 'nav2_default_view.rviz')
     nav2_params_file = os.path.join(pkg_share_dir, 'config', 'nav2_params.yaml')
     robot_description_file = os.path.join(pkg_share_dir, 'urdf', 'supermarketbot.xacro')
