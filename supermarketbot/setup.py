@@ -25,13 +25,11 @@ setup(
     zip_safe=True,
     maintainer='Chirag Taneja',
     maintainer_email='chiragtaneja.work@gmail.com',
-    description='Autonomous supermarket assistant robot — ROS 2 simulation for product navigation and customer interaction',
+    description='Autonomous supermarket assistant robot — ROS 2 simulation with SLAM mapping and Nav2 navigation',
     license='MIT',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'vision_node = supermarketbot.vision:main',
-            'locator = supermarketbot.product_locator:main',
             'auto_explorer = supermarketbot.auto_explorer:main',
         ],
     },

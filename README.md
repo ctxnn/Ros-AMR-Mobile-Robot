@@ -6,7 +6,7 @@
 
 | Field | Value |
 |---|---|
-| ROS 2 Distro | Jazzy / Humble |
+| ROS 2 Distro |  Humble |
 | Simulator | Gazebo Sim (gz-sim) |
 | Build System | `ament_python` |
 | Package Name | `supermarketbot` |
@@ -438,10 +438,13 @@ supermarketbot/                        # ROS 2 Python package root
 │
 ├── supermarketbot/                    # Python source module
 │   ├── __init__.py
+│   └── auto_explorer.py              # Autonomous waypoint explorer node
 │
 ├── launch/
 │   ├── slam.launch.py                 # SLAM mode — mapping the supermarket
-│   └── nav2.launch.py                 # Nav2 mode — autonomous navigation
+│   ├── slam_headless.launch.py        # SLAM mode — headless (no Gazebo GUI)
+│   ├── nav2.launch.py                 # Nav2 mode — autonomous navigation
+│   └── explore.launch.py             # Nav2 + SLAM for auto exploration
 │
 ├── urdf/
 │   └── supermarketbot.xacro           # Robot description (URDF via Xacro)
@@ -451,11 +454,10 @@ supermarketbot/                        # ROS 2 Python package root
 │   ├── chassis_l2.stl                 # Chassis layer 2
 │   ├── chassis_l3.stl                 # Chassis layer 3
 │   ├── wheel.stl                      # Drive wheel (shared L/R)
-│   ├── lidar_base_link.stl            # LiDAR housing
-│   └── lidar_scanner_link.stl         # LiDAR scanner head
+│   └── lidar_base_link.stl            # LiDAR housing
 │
 ├── world/
-│   └── world.sdf                      # Supermarket environment (SDF 1.10)
+│   └── world.sdf                      # Supermarket environment (SDF 1.9)
 │
 ├── config/
 │   ├── ros_gz_bridge_gazebo.yaml      # ROS ↔ Gazebo topic bridge
@@ -465,8 +467,13 @@ supermarketbot/                        # ROS 2 Python package root
 │   └── slam_toolbox_cfg.yaml          # SLAM laser parameters
 │
 ├── maps/
-│   ├── world_map.pgm                  # Occupancy grid (regenerate after world change)
-│   └── world_map.yaml                 # Map metadata
+│   ├── supermarket_map.pgm            # Supermarket occupancy grid
+│   ├── supermarket_map.yaml           # Supermarket map metadata
+│   ├── world_map.pgm                  # World occupancy grid
+│   └── world_map.yaml                 # World map metadata
+│
+├── scripts/
+│   └── save_map.sh                    # Helper script to save SLAM maps
 │
 ├── rviz/
 │   └── slam_cfg.rviz                  # RViz2 display configuration
