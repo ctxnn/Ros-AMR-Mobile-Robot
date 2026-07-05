@@ -77,7 +77,7 @@ def generate_launch_description():
     gz_server = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(gz_sim_launch_file),
         launch_arguments={
-            'gz_args': '-r ' + world_path + ' --render-engine-server ogre',
+            'gz_args': '-r -s ' + world_path + ' --render-engine-server ogre',
             'on_exit_shutdown': 'true',
         }.items(),
     )
@@ -98,7 +98,7 @@ def generate_launch_description():
         arguments=[
             '-topic', '/robot_description',
             '-name', 'supermarketbot',
-            '-x', '1.0',
+            '-x', '0.0',
             '-y', '1.0',
             '-z', '0.65',
         ],
