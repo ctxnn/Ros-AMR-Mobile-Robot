@@ -1,0 +1,35 @@
+<mujoco model="supermarketbot">
+  <compiler angle="radian" meshdir="./"/>
+
+  <asset>
+    <mesh name="chassis_l1" content_type="model/stl" file="../meshes/chassis_l1.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="chassis_l2" content_type="model/stl" file="../meshes/chassis_l2.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="chassis_l3" content_type="model/stl" file="../meshes/chassis_l3.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="wheel" content_type="model/stl" file="../meshes/wheel.stl" scale="0.001 0.001 0.001"/>
+    <mesh name="lidar_base_link" content_type="model/stl" file="../meshes/lidar_base_link.stl" scale="0.001 0.001 0.001"/>
+  </asset>
+
+  <worldbody>
+    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.3 0.3 0.3 1" mesh="chassis_l1"/>
+    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.3 0.3 0.3 1" mesh="chassis_l2"/>
+    <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.3 0.3 0.3 1" mesh="chassis_l3"/>
+    <geom size="0.080325 0.09 0.05" pos="0 0.009 0.066" type="box" rgba="0.3 0.3 0.3 1"/>
+    <geom size="0.009 0.01" pos="-0.064 0.0105 0.01" type="cylinder" rgba="0.3 0.3 0.3 1"/>
+    <geom size="0.01 0.02 0.01" pos="0.06 0.005 0.09" type="box" contype="0" conaffinity="0" group="1" density="0" rgba="0 0.5 0 1"/>
+    <geom pos="0 -9e-06 -0.000115" quat="1 0 0 0" type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.02 0.02 0.02 1" mesh="lidar_base_link"/>
+    <geom size="0.02 0.0075" pos="0.015 0.01 0.15" type="cylinder" contype="0" conaffinity="0" group="1" density="0" rgba="0.3 0.3 0.3 1"/>
+    <geom size="0.03 0.03 0.03" pos="0.015 0.01 0.13" type="box" rgba="0.3 0.3 0.3 1"/>
+    <body name="left_wheel_link" pos="0.051 0.1125 0.034">
+      <inertial pos="0 0 0" quat="0.707107 0 0 0.707107" mass="0.2" diaginertia="0.0002 0.0001 0.0001"/>
+      <joint name="left_wheel_link_to_chassis_link_joint" pos="0 0 0" axis="0 1 0"/>
+      <geom quat="0 0 0 1" type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.02 0.02 0.02 1" mesh="wheel"/>
+      <geom size="0.035 0.01" quat="0.707388 0.706825 0 0" type="cylinder" rgba="0.02 0.02 0.02 1"/>
+    </body>
+    <body name="right_wheel_link" pos="0.051 -0.0925 0.034">
+      <inertial pos="0 0 0" quat="0.707107 0 0 0.707107" mass="0.2" diaginertia="0.0002 0.0001 0.0001"/>
+      <joint name="right_wheel_link_to_chassis_link_joint" pos="0 0 0" axis="0 1 0"/>
+      <geom type="mesh" contype="0" conaffinity="0" group="1" density="0" rgba="0.02 0.02 0.02 1" mesh="wheel"/>
+      <geom size="0.035 0.01" quat="0.707388 0.706825 0 0" type="cylinder" rgba="0.02 0.02 0.02 1"/>
+    </body>
+  </worldbody>
+</mujoco>

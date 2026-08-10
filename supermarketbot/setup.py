@@ -4,6 +4,11 @@ from glob import glob
 
 package_name = 'supermarketbot'
 
+
+def files(pattern):
+    return [f for f in glob(pattern) if os.path.isfile(f)]
+
+
 setup(
     name=package_name,
     version='0.0.1',
@@ -12,14 +17,14 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        (os.path.join('share', package_name, 'launch'), glob('launch/*.launch.py')),
-        (os.path.join('share', package_name, 'urdf'), glob('urdf/*')),
+        (os.path.join('share', package_name, 'launch'), files('launch/*.launch.py')),
+        (os.path.join('share', package_name, 'urdf'), files('urdf/*')),
         (os.path.join('share', package_name, 'meshes'),
         [f for f in glob('meshes/**/*', recursive=True) if os.path.isfile(f)]),
-        (os.path.join('share', package_name, 'world'), glob('world/*')),
-        (os.path.join('share', package_name, 'config'), glob('config/*')),
-        (os.path.join('share', package_name, 'maps'), glob('maps/*')),
-        (os.path.join('share', package_name, 'rviz'), glob('rviz/*')),
+        (os.path.join('share', package_name, 'world'), files('world/*')),
+        (os.path.join('share', package_name, 'config'), files('config/*')),
+        (os.path.join('share', package_name, 'maps'), files('maps/*')),
+        (os.path.join('share', package_name, 'rviz'), files('rviz/*')),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -33,6 +38,7 @@ setup(
             'vision_node = supermarketbot.vision:main',
             'locator = supermarketbot.product_locator:main',
             'auto_explorer = supermarketbot.auto_explorer:main',
+            'mujoco_bridge = supermarketbot.mujoco_bridge:main',
         ],
     },
 )

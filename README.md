@@ -512,6 +512,7 @@ sudo apt install \
   ros-${ROS_DISTRO}-joint-state-publisher-gui \
   ros-${ROS_DISTRO}-rviz2 \
   ros-${ROS_DISTRO}-cv-bridge \
+  ros-${ROS_DISTRO}-topic-tools \
   ros-${ROS_DISTRO}-teleop-twist-keyboard
 
 pip install numpy==1.26.4 opencv-python
